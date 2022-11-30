@@ -3,5 +3,10 @@
     public class CalendarBookingViewModel
     {
         public int Id { get; set; }
+
+        public int Unit { get; set; }
+
+        public int [] PreparationTimes { get; set; }
+        
     }
 }
