@@ -40,5 +40,21 @@ namespace VacationRental.Api.Controllers
 
             return key;
         }
+
+        [HttpPut]
+        public RentalViewModel Put(RentalUpdateBindingModel model)
+        {
+            if (model.Id < 0)
+                    throw new ApplicationException("Id must be positive");
+            if (!_rentals.ContainsKey(model.Id))
+                throw new ApplicationException("Rental not found");
+
+            _rentals[model.Id].Units = model.Units;
+            _rentals[model.Id].PreparationTimeInDays = model.PreparationTimeInDays;            
+
+            return _rentals[model.Id];
+        }
+
+
     }
 }
