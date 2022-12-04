@@ -38,16 +38,35 @@ namespace VacationRental.Api.Controllers
                 var date = new CalendarDateViewModel
                 {
                     Date = start.Date.AddDays(i),
-                    Bookings = new List<CalendarBookingViewModel>()
+                    Bookings = new List<CalendarBookingViewModel>(),
+                    PreparationTimes = new List<CalendarPreparationTimeViewModel>()
                 };
 
                 foreach (var booking in _bookings.Values)
                 {
-                    if (booking.RentalId == rentalId
-                        && booking.Start <= date.Date && booking.Start.AddDays(booking.Nights) > date.Date)
+                    var endDate = booking.Start.AddDays(booking.Nights);
+                    var xEndDate = booking.Start.AddDays(booking.Nights).AddDays(_rentals[booking.RentalId].PreparationTimeInDays);
+
+                    if (booking.RentalId == rentalId)
                     {
-                        date.Bookings.Add(new CalendarBookingViewModel { Id = booking.Id, Unit = booking.Unit, PreparationTimes=booking.PreparationTimes });
-                    }
+                        // Add All bookings that exist beyond the given date
+                        if (booking.Start <= date.Date && endDate > date.Date)
+                        {
+                            date.Bookings.Add(new CalendarBookingViewModel
+                            {
+                                Id = booking.Id,
+                                Unit = booking.Unit
+                            });
+                        }
+                        else if (date.Date > endDate && date.Date <= xEndDate)
+                        {
+                            //Add unit in return object.
+                            date.PreparationTimes.Add(new CalendarPreparationTimeViewModel
+                            {
+                               Unit = booking.Unit
+                            });
+                        }
+                    }                    
                 }
 
                 result.Dates.Add(date);

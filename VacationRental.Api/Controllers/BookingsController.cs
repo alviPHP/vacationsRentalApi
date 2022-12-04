@@ -11,13 +11,16 @@ namespace VacationRental.Api.Controllers
     {
         private readonly IDictionary<int, RentalViewModel> _rentals;
         private readonly IDictionary<int, BookingViewModel> _bookings;
+        private readonly IDictionary<int, PreparationTimeViewModel> _preparationTime;
 
         public BookingsController(
             IDictionary<int, RentalViewModel> rentals,
-            IDictionary<int, BookingViewModel> bookings)
+            IDictionary<int, BookingViewModel> bookings,
+            IDictionary<int, PreparationTimeViewModel> preparationTime)
         {
             _rentals = rentals;
             _bookings = bookings;
+            _preparationTime= preparationTime;
         }
 
         [HttpGet]
@@ -45,18 +48,41 @@ namespace VacationRental.Api.Controllers
                 {
                     if (booking.RentalId == model.RentalId)
                     {
-                        if ((booking.Start <= model.Start.Date && booking.Start.AddDays(booking.Nights) > model.Start.Date)
-                        || (booking.Start < model.Start.AddDays(model.Nights) && booking.Start.AddDays(booking.Nights) >= model.Start.AddDays(model.Nights))
-                        || (booking.Start > model.Start && booking.Start.AddDays(booking.Nights) < model.Start.AddDays(model.Nights)))
-                        {
+                        //Get End Date
+                        var endDate1 = booking.Start.AddDays(booking.Nights);
+                        var endDate2 = model.Start.AddDays(model.Nights);
+
+                        //Adding X additional days for cleaning on the day end.
+                        var xEndDate1 = endDate1.AddDays(_rentals[booking.RentalId].PreparationTimeInDays);
+                        var xEndDate2 = endDate2.AddDays(_rentals[model.RentalId].PreparationTimeInDays);
+
+                        //Check if unit is occupied
+                        if ((booking.Start <= model.Start.Date && xEndDate1 > model.Start.Date) 
+                            || (booking.Start < xEndDate2 && xEndDate1 >= xEndDate2) || (booking.Start > model.Start && xEndDate1 < xEndDate2))
+                         {
+                            //Check if same unit occupied for the night 
+                            if(booking.Unit == model.Unit)
+                                throw new ApplicationException("Not available");
+
+                            //Add PreparationTime units
+                            if (model.Start > endDate1 && model.Start <= xEndDate1)
+                            {
+                                if(!_preparationTime.ContainsKey(booking.Id))
+                                {
+                                    _preparationTime.Add(booking.Id, new PreparationTimeViewModel
+                                    {
+                                        Unit = booking.Unit
+                                    });
+                                }                                
+                            }
+                            // Count occupied unit
                             count++;
-                        }
+                         }                      
                     }
                 }
                 if (count >= _rentals[model.RentalId].Units)
                     throw new ApplicationException("Not available");
             }
-
 
             var key = new ResourceIdViewModel { Id = _bookings.Keys.Count + 1 };
 

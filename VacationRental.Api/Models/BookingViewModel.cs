@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace VacationRental.Api.Models
@@ -10,7 +11,6 @@ namespace VacationRental.Api.Models
         public DateTime Start { get; set; }
         public int Nights { get; set; }
         public int Unit { get; set; }
-        public List<PreparationTimeViewModel> PreparationTimes { get; set; }
 
     }
 }
