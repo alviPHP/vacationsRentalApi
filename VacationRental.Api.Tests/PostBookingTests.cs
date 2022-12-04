@@ -22,7 +22,8 @@ namespace VacationRental.Api.Tests
         {
             var postRentalRequest = new RentalBindingModel
             {
-                Units = 4
+                Units = 4,
+                PreparationTimeInDays = 3
             };
 
             ResourceIdViewModel postRentalResult;
@@ -36,7 +37,8 @@ namespace VacationRental.Api.Tests
             {
                  RentalId = postRentalResult.Id,
                  Nights = 3,
-                 Start = new DateTime(2001, 01, 01)
+                 Start = new DateTime(2001, 01, 01),
+                 Unit = 1
             };
 
             ResourceIdViewModel postBookingResult;
@@ -54,6 +56,7 @@ namespace VacationRental.Api.Tests
                 Assert.Equal(postBookingRequest.RentalId, getBookingResult.RentalId);
                 Assert.Equal(postBookingRequest.Nights, getBookingResult.Nights);
                 Assert.Equal(postBookingRequest.Start, getBookingResult.Start);
+                Assert.Equal(postBookingRequest.Unit, getBookingResult.Unit);
             }
         }
 
@@ -62,7 +65,8 @@ namespace VacationRental.Api.Tests
         {
             var postRentalRequest = new RentalBindingModel
             {
-                Units = 1
+                Units = 1,
+                PreparationTimeInDays = 1,
             };
 
             ResourceIdViewModel postRentalResult;
@@ -76,7 +80,8 @@ namespace VacationRental.Api.Tests
             {
                 RentalId = postRentalResult.Id,
                 Nights = 3,
-                Start = new DateTime(2002, 01, 01)
+                Start = new DateTime(2002, 01, 01),
+                Unit = 1
             };
 
             using (var postBooking1Response = await _client.PostAsJsonAsync($"/api/v1/bookings", postBooking1Request))
@@ -88,7 +93,8 @@ namespace VacationRental.Api.Tests
             {
                 RentalId = postRentalResult.Id,
                 Nights = 1,
-                Start = new DateTime(2002, 01, 02)
+                Start = new DateTime(2002, 01, 02),
+                Unit= 1
             };
 
             await Assert.ThrowsAsync<ApplicationException>(async () =>

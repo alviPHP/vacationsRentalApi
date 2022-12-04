@@ -22,7 +22,8 @@ namespace VacationRental.Api.Tests
         {
             var postRentalRequest = new RentalBindingModel
             {
-                Units = 2
+                Units = 2,
+                PreparationTimeInDays = 1
             };
 
             ResourceIdViewModel postRentalResult;
@@ -36,7 +37,8 @@ namespace VacationRental.Api.Tests
             {
                  RentalId = postRentalResult.Id,
                  Nights = 2,
-                 Start = new DateTime(2000, 01, 02)
+                 Start = new DateTime(2000, 01, 02),
+                 Unit = 1
             };
 
             ResourceIdViewModel postBooking1Result;
@@ -50,7 +52,8 @@ namespace VacationRental.Api.Tests
             {
                 RentalId = postRentalResult.Id,
                 Nights = 2,
-                Start = new DateTime(2000, 01, 03)
+                Start = new DateTime(2000, 01, 03),
+                Unit = 1
             };
 
             ResourceIdViewModel postBooking2Result;
@@ -60,7 +63,7 @@ namespace VacationRental.Api.Tests
                 postBooking2Result = await postBooking2Response.Content.ReadAsAsync<ResourceIdViewModel>();
             }
 
-            using (var getCalendarResponse = await _client.GetAsync($"/api/v1/calendar?rentalId={postRentalResult.Id}&start=2000-01-01&nights=5"))
+            using (var getCalendarResponse = await _client.GetAsync($"/api/v1/calendar?rentalId={postRentalResult.Id}&start=2000-01-01&nights=5&unit=1"))
             {
                 Assert.True(getCalendarResponse.IsSuccessStatusCode);
 
