@@ -11,16 +11,13 @@ namespace VacationRental.Api.Controllers
     {
         private readonly IDictionary<int, RentalViewModel> _rentals;
         private readonly IDictionary<int, BookingViewModel> _bookings;
-        private readonly IDictionary<int, PreparationTimeViewModel> _preparationTime;
 
 
         public RentalsController(IDictionary<int, RentalViewModel> rentals, 
-            IDictionary<int, BookingViewModel> bookings,
-            IDictionary<int, PreparationTimeViewModel> preparationTime)
+            IDictionary<int, BookingViewModel> bookings)
         {
             _rentals = rentals;
             _bookings = bookings;
-            _preparationTime = preparationTime;
         }
 
         [HttpGet]
@@ -51,65 +48,44 @@ namespace VacationRental.Api.Controllers
         [HttpPut]
         public RentalViewModel Put(RentalUpdateBindingModel model)
         {
-            //int Units = 0;
-            //int PreparationTimeInDays = 0;
             if (model.Id < 0)
-                    throw new ApplicationException("Id must be positive");
+                throw new ApplicationException("Id must be positive");
             if (!_rentals.ContainsKey(model.Id))
-                throw new ApplicationException("Rental not found");
-            
-            foreach(var booking in _bookings.Values)
-            {
-                foreach (var rental in _rentals.Values)
-                {
-                    if(booking.RentalId == rental.Id)
-                    {
-                        // If Units are increased
-                        if (model.Units > rental.Units)
-                        {
-                            rental.Units = model.Units;
-                        }// If Units are decreased
-                        else if (model.Units < rental.Units)
-                        {
-                            if(_preparationTime[booking.Id].Unit > model.Units)
-                                throw new ApplicationException("Units Overlap");
-                        }
-                        //else
-                        //{
-                        //    Units = rental.Units;
-                        //}
-                        
-                        // If Preaparation days are increased
-                        if (model.PreparationTimeInDays > rental.PreparationTimeInDays)
-                        {
-                            rental.PreparationTimeInDays = model.PreparationTimeInDays;
-                        }// If Preaparation days are decreased
-                        else if(model.PreparationTimeInDays < rental.PreparationTimeInDays)
-                        {
-                          //  
-                            if(_preparationTime[booking.Id].Unit > 0)
-                            {
-                                var xNewEndDate = booking.Start.AddDays(booking.Nights).AddDays(model.PreparationTimeInDays);
-                                var xEndDate = booking.Start.AddDays(booking.Nights).AddDays(rental.PreparationTimeInDays);
+                throw new ApplicationException("Rental not found"); 
+            if(model.Units <= 0)
+                throw new ApplicationException("Units must be greater then 0");
+            if (model.PreparationTimeInDays <= 0)
+                throw new ApplicationException("Preparation time must be greater then 0");
 
-                                if (booking.Unit == _preparationTime[booking.Id].Unit && xNewEndDate== xEndDate)
-                                    throw new ApplicationException("Unit Overlap");
-                            }
-                        }
-                        //else
-                        //{
-                        //    PreparationTimeInDays = rental.PreparationTimeInDays;
-                        //}
+
+            foreach (var booking in _bookings.Values)
+            {
+                if (booking.RentalId == model.Id)
+                {
+                    //Check Overlap.
+
+                    if (model.Units < _rentals[model.Id].Units 
+                        && booking.Unit > model.Units)
+                    {
+                        throw new ApplicationException("Units Overlap..");
                     }
+                    
+                    if (model.PreparationTimeInDays < _rentals[model.Id].PreparationTimeInDays
+                        && (DateTime.Today > booking.Start.AddDays(booking.Nights)
+                        && DateTime.Today <= booking.Start.AddDays(booking.Nights).AddDays(_rentals[booking.RentalId].PreparationTimeInDays) 
+                        && booking.Unit > 0))
+
+                     {
+                         throw new ApplicationException("A Unit Overlap with preparation day time.");
+                     }
                 }
+                                
             }
 
-           // _rentals[model.Id].Units = Units;
-           // _rentals[model.Id].PreparationTimeInDays = PreparationTimeInDays;            
+            _rentals[model.Id].Units = model.Units;
+            _rentals[model.Id].PreparationTimeInDays = model.PreparationTimeInDays;
 
             return _rentals[model.Id];
         }
-
-
     }
 }

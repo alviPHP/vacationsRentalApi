@@ -11,16 +11,12 @@ namespace VacationRental.Api.Controllers
     {
         private readonly IDictionary<int, RentalViewModel> _rentals;
         private readonly IDictionary<int, BookingViewModel> _bookings;
-        private readonly IDictionary<int, PreparationTimeViewModel> _preparationTime;
 
-        public BookingsController(
-            IDictionary<int, RentalViewModel> rentals,
-            IDictionary<int, BookingViewModel> bookings,
-            IDictionary<int, PreparationTimeViewModel> preparationTime)
+        public BookingsController(IDictionary<int, RentalViewModel> rentals,
+                                  IDictionary<int, BookingViewModel> bookings)
         {
             _rentals = rentals;
             _bookings = bookings;
-            _preparationTime= preparationTime;
         }
 
         [HttpGet]
@@ -63,18 +59,7 @@ namespace VacationRental.Api.Controllers
                             //Check if same unit occupied for the night 
                             if(booking.Unit == model.Unit)
                                 throw new ApplicationException("Not available");
-
-                            //Add PreparationTime units
-                            if (model.Start > endDate1 && model.Start <= xEndDate1)
-                            {
-                                if(!_preparationTime.ContainsKey(booking.Id))
-                                {
-                                    _preparationTime.Add(booking.Id, new PreparationTimeViewModel
-                                    {
-                                        Unit = booking.Unit
-                                    });
-                                }                                
-                            }
+                            
                             // Count occupied unit
                             count++;
                          }                      
