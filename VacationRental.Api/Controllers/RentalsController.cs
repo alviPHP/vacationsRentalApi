@@ -57,12 +57,11 @@ namespace VacationRental.Api.Controllers
             if (model.PreparationTimeInDays <= 0)
                 throw new ApplicationException("Preparation time must be greater then 0");
 
-
             foreach (var booking in _bookings.Values)
             {
                 if (booking.RentalId == model.Id)
                 {
-                    //Check Overlap.
+                    //Check Units Overlap.
 
                     if (model.Units < _rentals[model.Id].Units 
                         && booking.Unit > model.Units)
@@ -70,6 +69,8 @@ namespace VacationRental.Api.Controllers
                         throw new ApplicationException("Units Overlap..");
                     }
                     
+                    //Check Preparation time.
+
                     if (model.PreparationTimeInDays < _rentals[model.Id].PreparationTimeInDays
                         && (DateTime.Today > booking.Start.AddDays(booking.Nights)
                         && DateTime.Today <= booking.Start.AddDays(booking.Nights).AddDays(_rentals[booking.RentalId].PreparationTimeInDays) 
