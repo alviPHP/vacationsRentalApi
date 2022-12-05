@@ -81,7 +81,8 @@ namespace VacationRental.Api.Services
 
                         foreach (var nBooking in _bookings.Values)
                         {
-                            if (nBooking.RentalId == booking.RentalId 
+                            if (nBooking.Id != booking.Id
+                                && nBooking.RentalId == booking.RentalId 
                                 && nBooking.Unit == booking.Unit 
                                 && nBooking.Start <= newXEndDate)
                             {
