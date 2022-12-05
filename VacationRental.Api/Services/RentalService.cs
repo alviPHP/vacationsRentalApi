@@ -83,7 +83,7 @@ namespace VacationRental.Api.Services
                         {
                             if (nBooking.RentalId == booking.RentalId 
                                 && nBooking.Unit == booking.Unit 
-                                && nBooking.Start == newXEndDate)
+                                && nBooking.Start <= newXEndDate)
                             {
                                 throw new ApplicationException("A Unit Overlap with preparation day time.");
                             }                                
