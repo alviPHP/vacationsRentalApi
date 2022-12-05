@@ -58,26 +58,38 @@ namespace VacationRental.Api.Services
             {
                 if (booking.RentalId == model.Id)
                 {
-                    //Check Units Overlap.
+                    /*Check Units Overlap.If Units decrease
+                     * 
+                     * logic : If current booking unit number is greater then given model units
+                     *         then overlap.
+                     */
 
-                    if (model.Units < _rentals[model.Id].Units
-                        && booking.Unit > model.Units)
-                    {
+                    if (model.Units < _rentals[model.Id].Units && booking.Unit > model.Units)
                         throw new ApplicationException("Units Overlap..");
-                    }
 
-                    //Check Preparation time.
+                    /*Check preparation time is Overlap.If preparation time is increase
+                     * 
+                     * logic : If current bookings new x end date (booking nights + new preparation days) 
+                     *         is equal to the start date of the same rental unit of following booking
+                     *         then overlap.
+                     *       
+                     */
 
-                    if (model.PreparationTimeInDays < _rentals[model.Id].PreparationTimeInDays
-                        && (DateTime.Today > booking.Start.AddDays(booking.Nights)
-                        && DateTime.Today <= booking.Start.AddDays(booking.Nights).AddDays(_rentals[booking.RentalId].PreparationTimeInDays)
-                        && booking.Unit > 0))
-
+                    if (model.PreparationTimeInDays > _rentals[model.Id].PreparationTimeInDays)
                     {
-                        throw new ApplicationException("A Unit Overlap with preparation day time.");
+                        var newXEndDate = booking.Start.AddDays(booking.Nights).AddDays(model.PreparationTimeInDays);
+
+                        foreach (var nBooking in _bookings.Values)
+                        {
+                            if (nBooking.RentalId == booking.RentalId 
+                                && nBooking.Unit == booking.Unit 
+                                && nBooking.Start == newXEndDate)
+                            {
+                                throw new ApplicationException("A Unit Overlap with preparation day time.");
+                            }                                
+                        }
                     }
                 }
-
             }
 
             _rentals[model.Id].Units = model.Units;
